@@ -1,0 +1,25 @@
+{
+  "organId": "CYBERSTRIPEDNA.SALES_SERVICES_CENTER",
+  "ref": "CC-MARKET-SALES-0001",
+  "version": "1.0.0",
+  "description": "Provider-side market movement organ. Performs market pricing, transaction fee calculation, redeemable exchange creation, and settlement-ready revenue math without owning metadata or performing financial authorization.",
+  "produces": [
+    "MARKET.PRICE",
+    "MARKET.FEE",
+    "MARKET.REDEEMABLE",
+    "MARKET.SETTLEMENT"
+  ],
+  "consumes": [
+    "METADATA.CONFLUX",
+    "PROVIDER.OFFER",
+    "ASSET.VALUE"
+  ],
+  "rules": {
+    "identity": false,
+    "continuity": false,
+    "accountRestrictions": false,
+    "merchantRestrictions": false,
+    "metadataOwnership": false,
+    "crossOrganMutation": false
+  }
+}
