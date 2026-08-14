@@ -1,73 +1,66 @@
 /**
- * CyberStripeDNA Sales & Services Center
- * File: utils/pricing.js
+ * CyberStripeDNA — Sales & Services Center
+ * IT REF: CC-MARKET-SALES-0001
+ *
+ * FILE: utils/market-pricing.js
  *
  * ONE JOB:
- * Provide the established market pricing value to
- * CyberCrowd sales and services.
+ * Calculate deterministic provider-side market pricing.
  *
- * This module does not create market ratios.
- * It does not define exchange policy.
- * It does not perform payment processing.
- * It only exposes pricing information already supplied
- * by the market.
+ * PRODUCES:
+ * - MARKET.PRICE
+ *
+ * CONSUMES:
+ * - PROVIDER.OFFER
+ * - ASSET.VALUE
+ * - marketRatio
+ *
+ * DOES NOT OWN:
+ * - Identity
+ * - Continuity
+ * - Account restrictions
+ * - Merchant restrictions
+ * - Metadata ownership
+ * - Payment authorization
+ * - Settlement execution
+ * - Cross-organ mutation
+ *
+ * BOUNDARY:
+ * This utility performs market math only.
+ * It does not authorize, charge, settle, or mutate
+ * anything outside the calculation it returns.
  */
 
-export function getPricing({
-  offer,
-  amount,
-  marketRatio,
-}) {
-  if (!offer) {
-    throw new Error("PRICING_OFFER_REQUIRED");
-  }
-
-  if (amount === undefined || amount === null || Number(amount) <= 0) {
-    throw new Error("PRICING_AMOUNT_REQUIRED");
-  }
-
-  if (!marketRatio) {
-    throw new Error("PRICING_MARKET_RATIO_REQUIRED");
-  }
-
-  return {
-    offer,
-    amount: Number(amount),
-    marketRatio,
-  };
-}
-
-export function getRedeemablePricing({
+export function calculateMarketPrice({
+  provider,
   offer,
   asset,
   assetAmount,
-  marketRatio,
+  marketRatio
 }) {
-  if (!offer) {
-    throw new Error("PRICING_OFFER_REQUIRED");
+  if (!provider || !offer || !asset) {
+    throw new Error("provider_offer_asset_required");
   }
 
-  if (!asset) {
-    throw new Error("PRICING_ASSET_REQUIRED");
+  const amount = Number(assetAmount);
+  const ratio = Number(marketRatio);
+
+  if (!Number.isFinite(amount) || amount < 0) {
+    throw new Error("valid_asset_amount_required");
   }
 
-  if (
-    assetAmount === undefined ||
-    assetAmount === null ||
-    Number(assetAmount) <= 0
-  ) {
-    throw new Error("PRICING_ASSET_AMOUNT_REQUIRED");
+  if (!Number.isFinite(ratio) || ratio < 0) {
+    throw new Error("valid_market_ratio_required");
   }
 
-  if (!marketRatio) {
-    throw new Error("PRICING_MARKET_RATIO_REQUIRED");
-  }
+  const totalMinor = Math.round(amount * ratio);
 
   return {
+    provider,
     offer,
     asset,
-    assetAmount: Number(assetAmount),
-    marketRatio,
-    status: "REDEEMABLE",
+    assetAmount: amount,
+    marketRatio: ratio,
+    totalMinor
   };
 }
