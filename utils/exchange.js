@@ -1,73 +1,68 @@
 /**
- * CyberStripeDNA Sales & Services Center
- * File: utils/exchange.js
+ * CyberStripeDNA — Sales & Services Center
+ * IT REF: CC-MARKET-SALES-0001
+ *
+ * FILE: utils/exchange.js
  *
  * ONE JOB:
- * Handle redeemable exchange value for CyberCrowd sales and services.
+ * Create the deterministic redeemable exchange value for a provider offer.
  *
- * The market ratio already exists elsewhere.
- * This module consumes that established ratio.
+ * INPUTS:
+ * - provider
+ * - offer
+ * - asset
+ * - assetAmount
+ * - marketRatio
  *
- * Exchange is not a bank.
- * Exchange is not a broker.
- * Exchange is not a lender.
- * Exchange is not an investment service.
+ * OUTPUT:
+ * - MARKET.REDEEMABLE
+ *
+ * DOES NOT OWN:
+ * - Identity
+ * - Continuity
+ * - Payment authorization
+ * - Account restrictions
+ * - Merchant restrictions
+ * - Metadata ownership
+ * - Settlement execution
+ *
+ * BOUNDARY:
+ * This utility creates a market-side redeemable object.
+ * It does not perform redemption or move funds.
  */
 
-export function createExchangeRedemption({
+export function getRedeemableValue({
   provider,
   offer,
   asset,
   assetAmount,
-  marketRatio,
+  marketRatio
 }) {
-  if (!provider) {
-    throw new Error("EXCHANGE_PROVIDER_REQUIRED");
+  if (!provider || !offer || !asset) {
+    throw new Error("provider_offer_asset_required");
   }
 
-  if (!offer) {
-    throw new Error("EXCHANGE_OFFER_REQUIRED");
+  const amount = Number(assetAmount);
+  const ratio = Number(marketRatio);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("valid_asset_amount_required");
   }
 
-  if (!asset) {
-    throw new Error("EXCHANGE_ASSET_REQUIRED");
+  if (!Number.isFinite(ratio) || ratio <= 0) {
+    throw new Error("valid_market_ratio_required");
   }
 
-  if (!assetAmount || Number(assetAmount) <= 0) {
-    throw new Error("EXCHANGE_AMOUNT_REQUIRED");
-  }
-
-  if (!marketRatio) {
-    throw new Error("EXCHANGE_MARKET_RATIO_REQUIRED");
-  }
+  const redeemableMinor = Math.round(amount * ratio);
 
   return {
     exchange: "CYBERCROWD-REDEEMABLE",
-    provider,
-    offer,
-    asset,
-    assetAmount: Number(assetAmount),
-    marketRatio,
     status: "REDEEMABLE",
-    custody: false,
-    brokerage: false,
-    banking: false,
-    createdAt: new Date().toISOString(),
-  };
-}
-
-export function getRedeemableValue(redemption) {
-  if (!redemption) {
-    throw new Error("EXCHANGE_REDEMPTION_REQUIRED");
-  }
-
-  return {
-    exchange: "CYBERCROWD-REDEEMABLE",
-    provider: redemption.provider,
-    offer: redemption.offer,
-    asset: redemption.asset,
-    assetAmount: redemption.assetAmount,
-    marketRatio: redemption.marketRatio,
-    status: redemption.status,
+    redemption: {
+      provider,
+      offer,
+      asset,
+      redeemableMinor
+    }
   };
 }
